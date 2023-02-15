@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/exec"
 	"runtime"
 	"time"
 )
@@ -14,15 +13,10 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	//cmd := exec.Command("./main")
-	//go receiver(20005)
+
+	timerExpiredCh := make(chan bool)
+	go receiver(20005, timerExpiredCh)
 	go startTimer()
-
-	cmd := exec.Command("gnome-terminal", "--", "go", "run", "main.go")
-
-	if err := cmd.Start(); err != nil {
-		fmt.Println(err)
-
-	}
 
 	//fmt.Println("Output: ", string(out))
 
@@ -32,7 +26,7 @@ func main() {
 
 func startTimer() {
 
-	timer1 := time.NewTimer(1 * time.Second)
+	timer1 := time.NewTimer(10 * time.Second)
 
 	<-timer1.C
 	fmt.Println("Timer b fired")
@@ -41,21 +35,20 @@ func startTimer() {
 
 }
 
-func receiver(port int) {
-	stopRecive := 10 * time.Second
-	timer1 := time.NewTimer(stopRecive)
+func receiver(port int, timerExpiredCh chan<- bool) {
 
 	ServerConn, _ := net.ListenUDP("udp", &net.UDPAddr{IP: []byte{0, 0, 0, 0}, Port: port, Zone: ""})
 	defer ServerConn.Close()
 	buf := make([]byte, 1024)
 	for {
 
+		fmt.Println("WTF")
 		n, addr, err := ServerConn.ReadFromUDP(buf)
 		if err != nil {
 			panic("panic")
 		}
 		fmt.Println("Received ", string(buf[0:n]), " from ", addr)
-		timer1.Reset(stopRecive)
+		timerExpiredCh <- true
 
 	}
 }

@@ -1,0 +1,12 @@
+start backup
+
+lytte etter primary/lese
+    Sette opp en UDP kanal og lytte
+
+ingen respons -> ta over som primary, lag en backup 
+
+    cmd := exec.Command("gnome-terminal", "--", "go", "run", "main.go") - kjør seg selv
+
+Begynn å send på kanal
+
+
